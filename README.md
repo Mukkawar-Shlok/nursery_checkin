@@ -59,6 +59,8 @@ curl -X POST localhost/rooms/$ROOM/check-ins \
   -d "{\"child_id\":\"$CHILD\"}"
 ```
 
+**Postman:** a collection with every endpoint and saved example responses (success, 400, 404, 409) is in [`docs/Meta Design.postman_collection.json`](docs/Meta%20Design.postman_collection.json). Import it into Postman. The tenant, room and child ids in it come from one seed run, so after `migrate:fresh --seed`, replace them with fresh ids from the queries above.
+
 The seeder creates **Little Stars Group** (nurseries Bandra and Andheri) and **Happy Kids Group** (Pune). Each nursery has two rooms, and each tenant has 10 children.
 
 ## Tests
@@ -130,6 +132,12 @@ Invariant: **a child has at most one open check-in.** It is enforced in `CheckIn
 
 Soft-deleted rooms and children resolve as 404. A child soft-deleted while checked in keeps the open check-in row and is excluded from occupants.
 
+**Delete rules: deferred.** There is no delete endpoint or admin UI, so rooms and children can only be deleted by hand, and no delete rules are enforced yet. The intended rule is:
+
+- **A room cannot be deleted while any child is still checked in to it.** Staff check every child out first, and then the room can be deleted.
+
+Until that rule exists, deleting a room that still has children in it leaves their check-ins pointing at a deleted room. If one of those children is then checked into another room, the check-in fails with a 500 instead of a 409, because the service no longer reads deleted rooms to get the title for the "already checked in to …" message. The fix belongs in the future delete-room flow, not in the check-in service.
+
 ## Assumptions
 
 - **Login is already handled elsewhere.** This system does not deal with usernames, passwords or staff roles.
@@ -165,7 +173,20 @@ Soft-deleted rooms and children resolve as 404. A child soft-deleted while check
 - A true parallel-request concurrency test, beyond the lock test.
 - Rate limiting.
 - An idempotency key on check-in, so a retried tap can't produce a confusing 409.
+- **Delete rules** (deferred, see Soft deletes): block deleting a room while any child is checked in to it.
 - An audit log of check-in changes. Check-out would then wrap the conditional update and the log insert in one transaction.
+
+## Running on AWS (ECS/Fargate)
+
+Until now I have mostly deployed with Laravel Forge on EC2, with Slack alerts on server CPU, RAM, disk and IOPS. This note maps that experience onto ECS/Fargate.
+
+**Container.** One FrankenPHP image (the Caddy web server is built in, so no Nginx), with the app installed using `composer install --no-dev` and no secrets baked in. The ALB routes traffic to the tasks and health-checks `/up`. Migrations run as a one-off ECS task before each rollout.
+
+**Secrets.** The database password and `APP_KEY` live in AWS Secrets Manager, and other settings in SSM Parameter Store. The task definition references them, and ECS injects them as environment variables at start-up, so Laravel reads them through `env()` unchanged. Only the task execution role can read them.
+
+**Database.** RDS PostgreSQL, Multi-AZ, in private subnets, reachable on port 5432 only from the ECS tasks' security group. The tasks connect through RDS Proxy as a connection pooler, because every FrankenPHP worker holds its own connection.
+
+**Logs and alerts.** `LOG_CHANNEL=stderr` sends Laravel logs, with the tenant id in the context, to CloudWatch Logs. CloudWatch alarms post to Slack on: ALB 5xx rate and p95 latency, unhealthy targets, ECS CPU and memory, and RDS CPU, connections, storage and IOPS.
 
 ## Telescope
 

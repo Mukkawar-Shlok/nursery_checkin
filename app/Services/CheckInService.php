@@ -27,9 +27,7 @@ final class CheckInService
             }
 
             if ($open) {
-                $other = $open->room()->withTrashed()->first();
-
-                throw new ConflictHttpException(__('api.errors.child_in_another_room', ['room' => $other->title]));
+                throw new ConflictHttpException(__('api.errors.child_in_another_room', ['room' => $open->room->title]));
             }
 
             return RoomCheckIn::create([
