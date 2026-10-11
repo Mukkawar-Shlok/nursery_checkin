@@ -110,12 +110,13 @@ The tests are split **by what could go wrong**, one file per concern:
 
 If a child already has an open check-in, a second check-in is **rejected with 409** and the response names the room they are in. Staff check the child out first.
 
+- **It is a nursery, so the system has to be strict.** For a parent, a child being checked in or out is not a small thing. Every move should be a clear, deliberate action by staff, never something the system does on its own.
 - Check-out times stay accurate. A silent move would invent a leave time for the first room, and nurseries rely on these times for ratios and safeguarding records.
 - No hidden data change. The caller always knows exactly what happened.
 - One rule and one error code, so it is easy to test and explain.
 - It catches mistakes. A second check-in is often the wrong child or the wrong room.
 
-**Trade-off:** staff do one extra step when a child moves rooms. Auto-move with a warning would be faster for them, and it is the first thing to change if asked.
+**Trade-off:** staff do one extra step when a child moves rooms. This is deliberate: in a nursery, being strict matters more than saving a tap.
 
 ## Concurrency guard
 
