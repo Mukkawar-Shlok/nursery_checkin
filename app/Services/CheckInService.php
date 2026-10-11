@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Exceptions\Domain\ChildAlreadyCheckedIn;
-use App\Exceptions\Domain\ChildInAnotherRoom;
-use App\Exceptions\Domain\ChildNotFound;
 use App\Models\Child;
 use App\Models\Room;
 use App\Models\RoomCheckIn;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 final class CheckInService
 {
@@ -20,16 +18,18 @@ final class CheckInService
     public function checkIn(Room $room, string $childId): RoomCheckIn
     {
         return DB::transaction(function () use ($room, $childId) {
-            $child = Child::lockForUpdate()->findOr($childId, fn () => throw new ChildNotFound);
+            $child = Child::lockForUpdate()->findOrFail($childId);
 
             $open = RoomCheckIn::where('child_id', $child->id)->whereNull('checked_out_at')->first();
 
             if ($open?->room_id === $room->id) {
-                throw new ChildAlreadyCheckedIn;
+                throw new ConflictHttpException(__('api.errors.child_already_checked_in'));
             }
 
             if ($open) {
-                throw new ChildInAnotherRoom($open->room()->withTrashed()->first());
+                $other = $open->room()->withTrashed()->first();
+
+                throw new ConflictHttpException(__('api.errors.child_in_another_room', ['room' => $other->title]));
             }
 
             return RoomCheckIn::create([

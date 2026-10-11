@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Exceptions\Domain\CheckInAlreadyClosed;
 use App\Models\RoomCheckIn;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 final class CheckOutService
 {
@@ -20,7 +20,7 @@ final class CheckOutService
         $checkIn = RoomCheckIn::findOrFail($id);
 
         if ($updated === 0) {
-            throw new CheckInAlreadyClosed;
+            throw new ConflictHttpException(__('api.errors.already_checked_out'));
         }
 
         return $checkIn;

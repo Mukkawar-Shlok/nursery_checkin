@@ -2,14 +2,13 @@
 
 namespace App\Http\Middleware;
 
-use App\Exceptions\Domain\TenantHeaderInvalid;
-use App\Exceptions\Domain\TenantNotFound;
 use App\Models\Tenant;
 use App\Support\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Must run before SubstituteBindings (see bootstrap/app.php) so that
@@ -24,10 +23,10 @@ final class ResolveTenant
         $id = $request->header('X-Tenant-ID');
 
         if (! is_string($id) || ! Str::isUuid($id)) {
-            throw new TenantHeaderInvalid;
+            throw new BadRequestHttpException(__('api.errors.tenant_header_invalid'));
         }
 
-        $this->context->set(Tenant::find($id) ?? throw new TenantNotFound);
+        $this->context->set(Tenant::findOrFail($id));
 
         return $next($request);
     }

@@ -29,9 +29,9 @@ class OccupantsTest extends TestCase
         $this->asTenant($this->tenant)
             ->getJson("/rooms/{$room->id}/occupants")
             ->assertOk()
-            ->assertJsonPath('data.0.check_in_id', $earlier->id)
-            ->assertJsonPath('data.1.check_in_id', $later->id)
-            ->assertJsonStructure(['data' => [['check_in_id', 'child_id', 'full_name', 'guardian_name', 'checked_in_at']]]);
+            ->assertJsonPath('data.items.0.check_in_id', $earlier->id)
+            ->assertJsonPath('data.items.1.check_in_id', $later->id)
+            ->assertJsonStructure(['data' => ['items' => [['check_in_id', 'child_id', 'full_name', 'guardian_name', 'checked_in_at']]]]);
     }
 
     public function test_excludes_checked_out_and_soft_deleted_children(): void
@@ -45,7 +45,7 @@ class OccupantsTest extends TestCase
         $this->asTenant($this->tenant)
             ->getJson("/rooms/{$room->id}/occupants")
             ->assertOk()
-            ->assertJsonCount(0, 'data');
+            ->assertJsonCount(0, 'data.items');
     }
 
     public function test_paginates(): void
@@ -54,18 +54,19 @@ class OccupantsTest extends TestCase
         RoomCheckIn::factory()->count(30)->create(['tenant_id' => $this->tenant->id, 'room_id' => $room->id]);
 
         $this->asTenant($this->tenant)->getJson("/rooms/{$room->id}/occupants")
-            ->assertJsonCount(25, 'data')
-            ->assertJsonPath('meta.total', 30);
+            ->assertJsonCount(25, 'data.items')
+            ->assertJsonPath('data.pagination.total_count', 30)
+            ->assertJsonPath('data.pagination.total_pages', 2);
 
         $this->asTenant($this->tenant)->getJson("/rooms/{$room->id}/occupants?page=2")
-            ->assertJsonCount(5, 'data');
+            ->assertJsonCount(5, 'data.items');
 
         $this->asTenant($this->tenant)->getJson("/rooms/{$room->id}/occupants?per_page=10&page=3")
-            ->assertJsonCount(10, 'data');
+            ->assertJsonCount(10, 'data.items');
 
         $this->asTenant($this->tenant)->getJson("/rooms/{$room->id}/occupants?per_page=500")
-            ->assertJsonPath('meta.per_page', 100)
-            ->assertJsonCount(30, 'data');
+            ->assertJsonPath('data.pagination.per_page', 100)
+            ->assertJsonCount(30, 'data.items');
     }
 
     public function test_empty_room_returns_empty_list(): void
@@ -75,6 +76,7 @@ class OccupantsTest extends TestCase
         $this->asTenant($this->tenant)
             ->getJson("/rooms/{$room->id}/occupants")
             ->assertOk()
-            ->assertJsonCount(0, 'data');
+            ->assertJsonCount(0, 'data.items')
+            ->assertJsonPath('data.pagination.total_pages', 0);
     }
 }

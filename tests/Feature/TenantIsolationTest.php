@@ -2,6 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Constants\APIResponseCodes;
+use App\Models\Child;
+use App\Models\Room;
+use App\Models\RoomCheckIn;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,7 +33,8 @@ class TenantIsolationTest extends TestCase
         $this->asTenant($this->a)
             ->getJson("/rooms/{$roomB->id}/occupants")
             ->assertNotFound()
-            ->assertJsonPath('error.code', 'not_found');
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(Room::class));
     }
 
     public function test_cannot_check_out_another_tenants_check_in(): void
@@ -38,7 +43,9 @@ class TenantIsolationTest extends TestCase
 
         $this->asTenant($this->a)
             ->postJson("/check-ins/{$checkInB->id}/check-out")
-            ->assertNotFound();
+            ->assertNotFound()
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(RoomCheckIn::class));
 
         $this->assertDatabaseHas('room_check_ins', ['id' => $checkInB->id, 'checked_out_at' => null]);
     }
@@ -51,7 +58,8 @@ class TenantIsolationTest extends TestCase
         $this->asTenant($this->a)
             ->postJson("/rooms/{$roomA->id}/check-ins", ['child_id' => $childB->id])
             ->assertNotFound()
-            ->assertJsonPath('error.code', 'child_not_found');
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(Child::class));
 
         $this->assertDatabaseCount('room_check_ins', 0);
     }
@@ -64,7 +72,8 @@ class TenantIsolationTest extends TestCase
         $this->asTenant($this->a)
             ->postJson("/rooms/{$roomB->id}/check-ins", ['child_id' => $childA->id])
             ->assertNotFound()
-            ->assertJsonPath('error.code', 'not_found');
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(Room::class));
 
         $this->assertDatabaseCount('room_check_ins', 0);
     }
@@ -80,7 +89,7 @@ class TenantIsolationTest extends TestCase
         $this->asTenant($this->a)
             ->getJson("/rooms/{$roomA->id}/occupants")
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.child_id', $childA->id);
+            ->assertJsonCount(1, 'data.items')
+            ->assertJsonPath('data.items.0.child_id', $childA->id);
     }
 }

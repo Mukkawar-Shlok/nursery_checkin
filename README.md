@@ -4,14 +4,29 @@ Three tenant-scoped endpoints for checking children in and out of nursery rooms,
 
 | Endpoint | Body | Success | Errors |
 |---|---|---|---|
-| `POST /rooms/{room}/check-ins` | `{ "child_id": "<uuid>" }` | 201 check-in | 404 room / child, 409 `child_already_checked_in`, 409 `child_in_another_room`, 422 |
-| `POST /check-ins/{id}/check-out` | none | 200 check-in | 404, 409 `already_checked_out` |
-| `GET /rooms/{room}/occupants?page=&per_page=` | none | 200 paginated | 404 |
+| `POST /rooms/{room}/check-ins` | `{ "child_id": "<uuid>" }` | 201 `S201` check-in | 404 `ERR_404` room / child, 409 `ERR_409` already in this room / in another room, 422 `E1000` |
+| `POST /check-ins/{id}/check-out` | none | 200 `S200` check-in | 404 `ERR_404`, 409 `ERR_409` already checked out |
+| `GET /rooms/{room}/occupants?page=&per_page=` | none | 200 `S200` paginated | 404 `ERR_404` |
 
-Every request needs `X-Tenant-ID: <tenant uuid>`. Every error has one shape:
+Every request needs `X-Tenant-ID: <tenant uuid>` (400 `ERR_400` if missing or invalid, 404 `ERR_404` if unknown).
+
+Every response uses one envelope, built by `App\Traits\ApiResponse`. Codes are in `App\Constants\APIResponseCodes`, and the title, message, HTTP status and icon for each code are in `config/api-response-codes.php`.
 
 ```json
-{ "error": { "code": "child_in_another_room", "message": "Child is already checked in to Sunflowers. Check them out first.", "room_id": "...", "room_title": "Sunflowers" } }
+{ "success": true, "code": "S201", "data": { "id": "...", "child_id": "...", "room_id": "...", "checked_in_at": "...", "checked_out_at": null },
+  "title": "Created", "message": "The resource was created successfully.", "icon": "check-circle-outline", "status_code": 201 }
+
+{ "success": false, "code": "ERR_409", "title": "Conflict", "message": "Child is already checked in to Sunflowers. Check them out first.",
+  "errors": [], "icon": "error", "status_code": 409 }
+
+{ "success": false, "code": "ERR_404", "title": "Not Found", "message": "The requested resource was not found. Please check the URL and try again.",
+  "errors": { "model": "No query results for model [App\\Models\\Room] 01a1..." }, "icon": "error", "status_code": 404 }
+```
+
+Occupants put `pagination` and `items` inside `data`:
+
+```json
+{ "success": true, "code": "S200", "data": { "pagination": { "current_page": 1, "per_page": 25, "total_count": 30, "total_pages": 2 }, "items": [ ... ] }, ... }
 ```
 
 ## Run it
@@ -55,8 +70,11 @@ The seeder creates **Little Stars Group** (nurseries Bandra and Andheri) and **H
 | `Services/CheckInService` | Check-in rules inside a transaction with a row lock on the child |
 | `Services/CheckOutService` | One conditional `UPDATE` |
 | `Services/OccupantService` | Paginated open check-ins with their children |
-| `Exceptions/Domain/*` | Each carries its HTTP status and a stable `code`. `bootstrap/app.php` maps them to the error shape |
-| Controllers, `CheckInChildRequest`, Resources | Thin HTTP translation |
+| `Traits/ApiResponse` | `success()` / `fail()` build the envelope from `config/api-response-codes.php`. It is used by every controller via the base `Controller` |
+| Errors | No custom exception classes. Models use `findOrFail()` (and route model binding). Rule failures throw built-in HTTP exceptions with messages from `lang/en/api.php`, e.g. `throw new ConflictHttpException(__('api.errors.already_checked_out'))` |
+| `Exceptions/Handler` | Catches everything for API routes (wired in `bootstrap/app.php`): `ValidationException`, not-found (`errors.model` names the model), `ConflictHttpException` and `BadRequestHttpException` go to `fail()`, and anything else is logged and returned as `ERR_500` |
+| `Http/Resources/*` | `data` payloads: `CheckInResource`, `OccupantListResource` (pagination + items of `OccupantResource`) |
+| Controllers, `CheckInChildRequest` | Thin HTTP translation. A missing room comes from the route's `missing()` callback |
 
 **Isolation.** `ResolveTenant` is in the middleware priority list ahead of `SubstituteBindings`, so `{room}` is resolved through the tenant scope. Another tenant's room or check-in is simply not found, and the API returns 404. The scope **fails closed**: querying a tenant-owned model with no tenant in context throws, so it never returns unscoped rows to tinker, a queued job or future code. `tenant_id` is never read from request input. A check-in copies it from the resolved room.
 
@@ -99,7 +117,7 @@ Soft-deleted rooms and children resolve as 404. A child soft-deleted while check
 - Soft-deleted rooms and children resolve as 404 (see above).
 - Guardian contact numbers are 10-digit Indian mobile numbers (`[6-9]` followed by 9 digits). They are generated in the factory only, since there is no register-child endpoint.
 - All ids are UUID v7. Timestamps are stored in UTC.
-- Occupants are paginated with 25 per page by default and at most 100, ordered by `checked_in_at` then `id`.
+- Occupants are paginated with 25 per page by default and at most 100, ordered by `checked_in_at` then `id`. The response carries `data.pagination` (`current_page`, `per_page`, `total_count`, `total_pages`) and `data.items`, with no page-link URLs.
 - Non-UUID path ids return 404 (route constraint), not a database error.
 - Data comes from seeders and factories. PostgreSQL is the datastore, and tests run against a separate PostgreSQL `testing` database.
 

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Constants\APIResponseCodes;
+use App\Models\RoomCheckIn;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -34,7 +36,8 @@ class CheckOutTest extends TestCase
         $this->asTenant($tenant)
             ->postJson("/check-ins/{$checkIn->id}/check-out")
             ->assertConflict()
-            ->assertJsonPath('error.code', 'already_checked_out');
+            ->assertJsonPath('code', APIResponseCodes::CONFLICT)
+            ->assertJsonPath('message', __('api.errors.already_checked_out'));
     }
 
     public function test_unknown_check_in_returns_404(): void
@@ -42,6 +45,8 @@ class CheckOutTest extends TestCase
         $this->asTenant(Tenant::factory()->create())
             ->postJson('/check-ins/'.Str::uuid7().'/check-out')
             ->assertNotFound()
-            ->assertJsonPath('error.code', 'not_found');
+            ->assertJsonPath('status_code', 404)
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(RoomCheckIn::class));
     }
 }

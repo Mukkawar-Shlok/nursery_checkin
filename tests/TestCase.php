@@ -7,6 +7,7 @@ use App\Models\Nursery;
 use App\Models\Room;
 use App\Models\RoomCheckIn;
 use App\Models\Tenant;
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,12 @@ abstract class TestCase extends BaseTestCase
             'child_id' => $child->id,
             ...$attributes,
         ]);
+    }
+
+    /** For 404s: errors.model is "No query results for model [App\\Models\\X] ...". */
+    protected function mentionsModel(string $class): Closure
+    {
+        return fn (string $message) => str_contains($message, "[{$class}]");
     }
 
     /** Bypasses the tenant scope on purpose: tests run outside any request. */

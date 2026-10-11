@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Constants\APIResponseCodes;
+use App\Models\Child;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -48,7 +50,8 @@ class CheckInTest extends TestCase
         $this->asTenant($this->tenant)
             ->postJson("/rooms/{$room->id}/check-ins", ['child_id' => $child->id])
             ->assertConflict()
-            ->assertJsonPath('error.code', 'child_already_checked_in');
+            ->assertJsonPath('code', APIResponseCodes::CONFLICT)
+            ->assertJsonPath('message', __('api.errors.child_already_checked_in'));
     }
 
     public function test_child_in_another_room_returns_409_naming_that_room(): void
@@ -61,9 +64,8 @@ class CheckInTest extends TestCase
         $this->asTenant($this->tenant)
             ->postJson("/rooms/{$bluebells->id}/check-ins", ['child_id' => $child->id])
             ->assertConflict()
-            ->assertJsonPath('error.code', 'child_in_another_room')
-            ->assertJsonPath('error.room_id', $sunflowers->id)
-            ->assertJsonPath('error.room_title', 'Sunflowers');
+            ->assertJsonPath('code', APIResponseCodes::CONFLICT)
+            ->assertJsonPath('message', __('api.errors.child_in_another_room', ['room' => 'Sunflowers']));
     }
 
     public function test_child_checked_out_of_one_room_can_check_into_another(): void
@@ -102,8 +104,8 @@ class CheckInTest extends TestCase
             $this->asTenant($this->tenant)
                 ->postJson("/rooms/{$room->id}/check-ins", $body)
                 ->assertUnprocessable()
-                ->assertJsonPath('error.code', 'validation_failed')
-                ->assertJsonStructure(['error' => ['fields' => ['child_id']]]);
+                ->assertJsonPath('code', APIResponseCodes::VALIDATION_FAILED)
+                ->assertJsonStructure(['errors' => ['child_id']]);
         }
     }
 
@@ -116,7 +118,8 @@ class CheckInTest extends TestCase
         $this->asTenant($this->tenant)
             ->postJson("/rooms/{$room->id}/check-ins", ['child_id' => $child->id])
             ->assertNotFound()
-            ->assertJsonPath('error.code', 'child_not_found');
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(Child::class));
     }
 
     public function test_soft_deleted_room_returns_404(): void

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\APIResponseCodes;
 use App\Http\Requests\CheckInChildRequest;
 use App\Http\Resources\CheckInResource;
 use App\Models\Room;
@@ -12,13 +13,13 @@ class CheckInController extends Controller
 {
     public function store(CheckInChildRequest $request, Room $room, CheckInService $service)
     {
-        return CheckInResource::make($service->checkIn($room, $request->validated('child_id')))
-            ->response()
-            ->setStatusCode(201);
+        $checkIn = $service->checkIn($room, $request->validated('child_id'));
+
+        return $this->success(APIResponseCodes::CREATED, new CheckInResource($checkIn));
     }
 
     public function checkOut(string $checkIn, CheckOutService $service)
     {
-        return CheckInResource::make($service->checkOut($checkIn));
+        return $this->success(APIResponseCodes::SUCCESS, new CheckInResource($service->checkOut($checkIn)));
     }
 }

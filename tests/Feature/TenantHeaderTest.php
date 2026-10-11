@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Constants\APIResponseCodes;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ class TenantHeaderTest extends TestCase
 
         $this->getJson("/rooms/{$room->id}/occupants")
             ->assertStatus(400)
-            ->assertJsonPath('error.code', 'tenant_header_invalid');
+            ->assertJsonPath('code', APIResponseCodes::BAD_REQUEST);
     }
 
     public function test_non_uuid_header_returns_400(): void
@@ -27,7 +28,7 @@ class TenantHeaderTest extends TestCase
         $this->withHeader('X-Tenant-ID', 'not-a-uuid')
             ->getJson("/rooms/{$room->id}/occupants")
             ->assertStatus(400)
-            ->assertJsonPath('error.code', 'tenant_header_invalid');
+            ->assertJsonPath('code', APIResponseCodes::BAD_REQUEST);
     }
 
     public function test_unknown_tenant_returns_404(): void
@@ -37,6 +38,7 @@ class TenantHeaderTest extends TestCase
         $this->withHeader('X-Tenant-ID', (string) Str::uuid7())
             ->getJson("/rooms/{$room->id}/occupants")
             ->assertNotFound()
-            ->assertJsonPath('error.code', 'tenant_not_found');
+            ->assertJsonPath('code', APIResponseCodes::NOT_FOUND)
+            ->assertJsonPath('errors.model', $this->mentionsModel(Tenant::class));
     }
 }
