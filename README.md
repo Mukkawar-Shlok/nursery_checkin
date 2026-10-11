@@ -186,4 +186,12 @@ Until now I have mostly deployed with Laravel Forge on EC2, with Slack alerts on
 - **Off in tests:** `TELESCOPE_ENABLED=false` in `phpunit.xml`.
 - **Storage:** entries go to the `telescope_entries` table (created by `migrate`). Clear them with `./vendor/bin/sail artisan telescope:clear`.
 
-# nursery_checkin
+## With more time
+
+1. **Role system:** control which staff can use which APIs, for example only managers can delete rooms.
+2. **Caching:** cache data that rarely changes, such as rooms and children. The live occupant list stays uncached so staff always see who is really in the room.
+3. **Partial unique index:** a database rule that a child can have only one open check-in. This backs up the service-level lock for anything that writes to the table directly.
+4. **Deletion policy:** rules for deleting rooms and children, starting with "a room cannot be deleted while a child is still checked in".
+5. **Admin dashboard:** a screen for admins to manage nurseries, rooms and children, and to see who is checked in where.
+6. **Audit log:** a record of who checked each child in and out, and when, for safeguarding.
+
