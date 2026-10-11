@@ -67,7 +67,6 @@ The seeder creates **Little Stars Group** (nurseries Bandra and Andheri) and **H
 
 ```sh
 ./vendor/bin/sail artisan test                          # all 24 tests
-./vendor/bin/sail artisan test --filter=TenantIsolation # one file
 ```
 
 All tests are **feature tests**: they send real HTTP requests to the API (with the `X-Tenant-ID` header) and check the response and the database. This tests what a client actually sees, including routing, middleware, validation and the error shape. They run on PostgreSQL, not SQLite, because SQLite ignores row locks.
@@ -125,7 +124,7 @@ Invariant: **a child has at most one open check-in.** It is enforced in `CheckIn
 - **Check-in:** `DB::transaction` + `Child::lockForUpdate()` (`SELECT ... FOR UPDATE`). Every check-in for a child goes through that child's row, so concurrent requests queue behind it. Under READ COMMITTED (the Postgres default) the second request then sees the first one's committed check-in and gets a 409. The lock only lives inside the transaction. Raising the isolation level to REPEATABLE READ or SERIALIZABLE would give the second request an older snapshot and break the guard. Different children never block each other.
 - **Check-out:** a single `UPDATE ... WHERE id = ? AND tenant_id = ? AND checked_out_at IS NULL`. Two racing check-outs: the second updates 0 rows and gets 409 (or 404 if the row isn't in this tenant). It is deliberately *not* load-check-save, which would let both requests pass the check.
 - **Why code, not a constraint:** the rule lives in one tested class, and 409s come from explicit domain exceptions instead of parsing driver-specific unique-violation errors.
-- **Weakness:** anything that writes `room_check_ins` without going through the service (tinker, a future importer) can break the invariant. The backstop is a partial unique index (see "With more time").
+- **Weakness:** anything that writes `room_check_ins` without going through the service (tinker, a future importer) can break the invariant. The backstop would be a partial unique index, `room_check_ins (child_id) WHERE checked_out_at IS NULL`.
 - **Why PostgreSQL for tests:** SQLite ignores `FOR UPDATE`, so a broken guard would still pass there. `tests/Feature/CheckInLockTest` holds a lock on the child row from a second connection and asserts the check-in blocks (hits `lock_timeout`). That connection uses `FOR NO KEY UPDATE` rather than `FOR UPDATE`. Otherwise the foreign-key check on the insert (`FOR KEY SHARE`) would block too, and the test would pass even with `lockForUpdate()` removed. I checked: it now fails when the lock is removed.
 
 ## Soft deletes
@@ -166,15 +165,6 @@ Until that rule exists, deleting a room that still has children in it leaves the
 - Authentication, permissions and roles. The brief says auth is already handled.
 - Endpoints for nursery listing, children listing, registering a child, and `GET /rooms`. Seeders and factories create the data instead.
 - Admin UI, notifications, reporting.
-
-## With more time
-
-- **Partial unique index** `room_check_ins (child_id) WHERE checked_out_at IS NULL` as a database backstop for writers that bypass the service.
-- A true parallel-request concurrency test, beyond the lock test.
-- Rate limiting.
-- An idempotency key on check-in, so a retried tap can't produce a confusing 409.
-- **Delete rules** (deferred, see Soft deletes): block deleting a room while any child is checked in to it.
-- An audit log of check-in changes. Check-out would then wrap the conditional update and the log insert in one transaction.
 
 ## Running on AWS (ECS/Fargate)
 
