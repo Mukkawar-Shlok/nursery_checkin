@@ -1,0 +1,874 @@
+{
+  "info": {
+    "_postman_id": "e3b78d3b-2771-452e-9ccd-315e4ee6b7fa",
+    "name": "Meta Design",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "20308261"
+  },
+  "item": [
+    {
+      "name": "Room Occupants",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Tenant-ID",
+            "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+          }
+        ],
+        "url": {
+          "raw": "localhost/rooms/:room/occupants?page=1",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "rooms",
+            ":room",
+            "occupants"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            }
+          ],
+          "variable": [
+            {
+              "key": "room",
+              "value": "01a12a36-b3f1-722c-b58a-476c580290c2"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Room Occupants",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "url": {
+              "raw": "localhost/rooms/:room/occupants?page=1",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "occupants"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3f1-722c-b58a-476c580290c2"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 10:52:09 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"code\": \"S200\",\n  \"data\": {\n    \"pagination\": {\n      \"current_page\": 1,\n      \"per_page\": 25,\n      \"total_count\": 2,\n      \"total_pages\": 1\n    },\n    \"items\": [\n      {\n        \"check_in_id\": \"01a12a7c-d386-729f-9116-c6057ab6f164\",\n        \"child_id\": \"01a12a36-b3f8-73a8-8fcd-ad6b82ab83dd\",\n        \"full_name\": \"Mr. Filiberto Kautzer\",\n        \"guardian_name\": \"Ozella Witting\",\n        \"checked_in_at\": \"2026-10-11T10:23:06.000000Z\"\n      },\n      {\n        \"check_in_id\": \"01a12a8a-516b-7322-95fe-01269f4a7b3b\",\n        \"child_id\": \"01a12a36-b3f9-72be-9bc7-dfdb7aca770d\",\n        \"full_name\": \"Domenic Stanton\",\n        \"guardian_name\": \"Onie Jerde III\",\n        \"checked_in_at\": \"2026-10-11T10:37:50.000000Z\"\n      }\n    ]\n  },\n  \"title\": \"Success\",\n  \"message\": \"The request was successful.\",\n  \"icon\": \"check-circle-outline\",\n  \"status_code\": 200\n}"
+        },
+        {
+          "name": "Room Id is Empty",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "url": {
+              "raw": "localhost/rooms/:room/occupants?page=1",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "occupants"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 10:52:40 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_404\",\n  \"title\": \"Not Found\",\n  \"message\": \"The requested resource was not found. Please check the URL and try again.\",\n  \"errors\": {\n    \"model\": \"The route rooms/:room/occupants could not be found.\"\n  },\n  \"icon\": \"error\",\n  \"status_code\": 404\n}"
+        },
+        {
+          "name": "Wrong Tenant",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "url": {
+              "raw": "localhost/rooms/:room/occupants?page=1",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "occupants"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3fd-7066-b5aa-2bdb3b83c93e"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 10:53:12 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_404\",\n  \"title\": \"Not Found\",\n  \"message\": \"The requested resource was not found. Please check the URL and try again.\",\n  \"errors\": {\n    \"model\": \"No query results for model [App\\\\Models\\\\Room] 01a12a36-b3fd-7066-b5aa-2bdb3b83c93e\"\n  },\n  \"icon\": \"error\",\n  \"status_code\": 404\n}"
+        },
+        {
+          "name": "Tenant Header is Missing",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "url": {
+              "raw": "localhost/rooms/:room/occupants?page=1",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "occupants"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3f1-722c-b58a-476c580290c2"
+                }
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 10:54:07 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_400\",\n  \"title\": \"Bad Request\",\n  \"message\": \"The X-Tenant-ID header is missing or is not a valid UUID.\",\n  \"errors\": [],\n  \"icon\": \"error\",\n  \"status_code\": 400\n}"
+        }
+      ]
+    },
+    {
+      "name": "Check In",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Tenant-ID",
+            "value": "01a12a36-b3fc-71a4-931d-0686ace36fb2"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"child_id\" : \"01a12a36-b3f8-73a8-8fcd-ad6b8398d64c\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost/rooms/:room/check-ins",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "rooms",
+            ":room",
+            "check-ins"
+          ],
+          "variable": [
+            {
+              "key": "room",
+              "value": "01a12a36-b3fd-7066-b5aa-2bdb3b83c93e"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3fc-71a4-931d-0686ace36fb2"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b401-736b-9620-08ad2a14ba24\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/rooms/:room/check-ins",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "check-ins"
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3fd-7066-b5aa-2bdb3b83c93e"
+                }
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 10:55:46 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"code\": \"S201\",\n  \"data\": {\n    \"id\": \"01a12a9a-be94-7209-8dc2-b104ffcbfd57\",\n    \"child_id\": \"01a12a36-b401-736b-9620-08ad2a14ba24\",\n    \"room_id\": \"01a12a36-b3fd-7066-b5aa-2bdb3b83c93e\",\n    \"checked_in_at\": \"2026-10-11T10:55:46.000000Z\",\n    \"checked_out_at\": null\n  },\n  \"title\": \"Created\",\n  \"message\": \"The resource was created successfully.\",\n  \"icon\": \"check-circle-outline\",\n  \"status_code\": 201\n}"
+        },
+        {
+          "name": "Already Checked In",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3fc-71a4-931d-0686ace36fb2"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b401-736b-9620-08ad2a14ba24\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/rooms/:room/check-ins",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "check-ins"
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3fd-7066-b5aa-2bdb3b83c93e"
+                }
+              ]
+            }
+          },
+          "status": "Conflict",
+          "code": 409,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 11:02:03 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_409\",\n  \"title\": \"Conflict\",\n  \"message\": \"Child is already checked in to this room.\",\n  \"errors\": [],\n  \"icon\": \"error\",\n  \"status_code\": 409\n}"
+        },
+        {
+          "name": "Wrong Child Id",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3fc-71a4-931d-0686ace36fb2"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b401-736b-9620-08ad2a14ba21\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/rooms/:room/check-ins",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "check-ins"
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3fd-7066-b5aa-2bdb3b83c93e"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 11:02:22 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_404\",\n  \"title\": \"Not Found\",\n  \"message\": \"The requested resource was not found. Please check the URL and try again.\",\n  \"errors\": {\n    \"model\": \"No query results for model [App\\\\Models\\\\Child] 01a12a36-b401-736b-9620-08ad2a14ba21\"\n  },\n  \"icon\": \"error\",\n  \"status_code\": 404\n}"
+        },
+        {
+          "name": "Diffrent Tenant of Child",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3fc-71a4-931d-0686ace36fb2"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b3f8-73a8-8fcd-ad6b8398d64c\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/rooms/:room/check-ins",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "rooms",
+                ":room",
+                "check-ins"
+              ],
+              "variable": [
+                {
+                  "key": "room",
+                  "value": "01a12a36-b3fd-7066-b5aa-2bdb3b83c93e"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 11:02:42 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_404\",\n  \"title\": \"Not Found\",\n  \"message\": \"The requested resource was not found. Please check the URL and try again.\",\n  \"errors\": {\n    \"model\": \"No query results for model [App\\\\Models\\\\Child] 01a12a36-b3f8-73a8-8fcd-ad6b8398d64c\"\n  },\n  \"icon\": \"error\",\n  \"status_code\": 404\n}"
+        }
+      ]
+    },
+    {
+      "name": "Check Out",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Tenant-ID",
+            "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"child_id\" : \"01a12a36-b3f8-73a8-8fcd-ad6b82ab83dd\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost/check-ins/:id/check-out",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "check-ins",
+            ":id",
+            "check-out"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "01a12a7c-d386-729f-9116-c6057ab6f161"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b3f8-73a8-8fcd-ad6b82ab83dd\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/check-ins/:id/check-out",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "check-ins",
+                ":id",
+                "check-out"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "01a12a7c-d386-729f-9116-c6057ab6f164"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 11:03:27 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"code\": \"S200\",\n  \"data\": {\n    \"id\": \"01a12a7c-d386-729f-9116-c6057ab6f164\",\n    \"child_id\": \"01a12a36-b3f8-73a8-8fcd-ad6b82ab83dd\",\n    \"room_id\": \"01a12a36-b3f1-722c-b58a-476c580290c2\",\n    \"checked_in_at\": \"2026-10-11T10:23:06.000000Z\",\n    \"checked_out_at\": \"2026-10-11T11:03:27.000000Z\"\n  },\n  \"title\": \"Success\",\n  \"message\": \"The request was successful.\",\n  \"icon\": \"check-circle-outline\",\n  \"status_code\": 200\n}"
+        },
+        {
+          "name": "Already Checked Out",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b3f8-73a8-8fcd-ad6b82ab83dd\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/check-ins/:id/check-out",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "check-ins",
+                ":id",
+                "check-out"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "01a12a7c-d386-729f-9116-c6057ab6f164"
+                }
+              ]
+            }
+          },
+          "status": "Conflict",
+          "code": 409,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 11:03:42 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_409\",\n  \"title\": \"Conflict\",\n  \"message\": \"This check-in has already been checked out.\",\n  \"errors\": [],\n  \"icon\": \"error\",\n  \"status_code\": 409\n}"
+        },
+        {
+          "name": "Wrong Check In id",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-ID",
+                "value": "01a12a36-b3eb-713d-922f-08e9b9b08ec6"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"child_id\" : \"01a12a36-b3f8-73a8-8fcd-ad6b82ab83dd\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost/check-ins/:id/check-out",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "check-ins",
+                ":id",
+                "check-out"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "01a12a7c-d386-729f-9116-c6057ab6f161"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "host",
+              "value": "localhost"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "PHP/8.5.11"
+            },
+            {
+              "key": "cache-control",
+              "value": "no-cache, private"
+            },
+            {
+              "key": "date",
+              "value": "Sun, 11 Oct 2026 11:04:01 GMT"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"code\": \"ERR_404\",\n  \"title\": \"Not Found\",\n  \"message\": \"The requested resource was not found. Please check the URL and try again.\",\n  \"errors\": {\n    \"model\": \"No query results for model [App\\\\Models\\\\RoomCheckIn] 01a12a7c-d386-729f-9116-c6057ab6f161\"\n  },\n  \"icon\": \"error\",\n  \"status_code\": 404\n}"
+        }
+      ]
+    }
+  ]
+}
