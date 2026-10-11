@@ -46,8 +46,6 @@ curl -X POST localhost/rooms/$ROOM/check-ins \
 
 The seeder creates **Little Stars Group** (nurseries Bandra and Andheri) and **Happy Kids Group** (Pune). Each nursery has two rooms, and each tenant has 10 children.
 
-**Debugging:** [Telescope](https://laravel.com/docs/telescope) is installed as a dev dependency and loads only when `APP_ENV=local`. Open http://localhost/telescope to see requests, queries (including the `FOR UPDATE`) and exceptions. It is disabled in tests (`TELESCOPE_ENABLED=false` in `phpunit.xml`).
-
 ## How it is built
 
 | Unit | Job |
@@ -119,7 +117,12 @@ Soft-deleted rooms and children resolve as 404. A child soft-deleted while check
 - An idempotency key on check-in, so a retried tap can't produce a confusing 409.
 - An audit log of check-in changes. Check-out would then wrap the conditional update and the log insert in one transaction.
 
-## AI use
+## Telescope
 
-Claude Code drafted the implementation from my written spec. It caught that the first version of the lock test passed even with `lockForUpdate()` removed (the FK's key-share lock blocked instead), and fixed it with `FOR NO KEY UPDATE`. _TODO (owner): add what you changed or rejected yourself._
+[Laravel Telescope](https://laravel.com/docs/telescope) is installed for local debugging. Open http://localhost/telescope to see each request with its `X-Tenant-ID` header, response and status, the SQL it ran (including the tenant `where` and the check-in's `SELECT ... FOR UPDATE`) and any exceptions.
+
+- **Dev only:** it is in `require-dev` and excluded from package discovery. `AppServiceProvider` registers it only when `APP_ENV=local`, so it never loads in production.
+- **Off in tests:** `TELESCOPE_ENABLED=false` in `phpunit.xml`.
+- **Storage:** entries go to the `telescope_entries` table (created by `migrate`). Clear them with `./vendor/bin/sail artisan telescope:clear`.
+
 # nursery_checkin

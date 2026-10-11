@@ -69,6 +69,5 @@ Everything above is built. All 24 tests pass on Postgres, and the curl smoke tes
 - `bootstrap/app.php` sets `shouldRenderJsonWhen(fn () => true)` so every error is JSON.
 - Test helpers live in `tests/TestCase.php`: `asTenant`, `roomFor`, `childFor`, `checkInRow`, `softDelete`. Tests run outside a request, so they have no tenant context. Use `assertDatabaseHas` and `softDelete()` (query builder), never `$model->refresh()` or `->delete()`, because the tenant scope throws without a context.
 - `RoomCheckInFactory` reads the room's `tenant_id` via `DB::table` so it doesn't need `withoutGlobalScopes()`.
-- Open item: the README's "AI use" section has a TODO for the owner.
 - Source spec: "Nursery Room Check-In API: Fixed Spec (Track A, Laravel)". README sections follow its section 9 checklist.
 - Telescope (added 2026-10-11): `laravel/telescope` is a dev dependency and in `dont-discover`. It is registered from `AppServiceProvider::register()` only when the environment is local, and it is not listed in `bootstrap/providers.php`. Dashboard: `/telescope`. Disabled in tests via `phpunit.xml`.
