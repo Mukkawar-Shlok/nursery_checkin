@@ -61,6 +61,33 @@ curl -X POST localhost/rooms/$ROOM/check-ins \
 
 The seeder creates **Little Stars Group** (nurseries Bandra and Andheri) and **Happy Kids Group** (Pune). Each nursery has two rooms, and each tenant has 10 children.
 
+## Tests
+
+```sh
+./vendor/bin/sail artisan test                          # all 24 tests
+./vendor/bin/sail artisan test --filter=TenantIsolation # one file
+```
+
+All tests are **feature tests**: they send real HTTP requests to the API (with the `X-Tenant-ID` header) and check the response and the database. This tests what a client actually sees, including routing, middleware, validation and the error shape. They run on PostgreSQL, not SQLite, because SQLite ignores row locks.
+
+The tests are split **by what could go wrong**, one file per concern:
+
+| File | What it proves | Tests |
+|---|---|---|
+| `TenantHeaderTest` | No request gets in without a valid group (tenant) | Header missing → 400. Not a UUID → 400. Unknown tenant → 404 |
+| `TenantIsolationTest` | **One group can never see or change another group's data** (the main security rule) | Listing another group's room → 404. Checking out another group's check-in → 404, and the row is left unchanged. Checking in another group's child → 404. Checking into another group's room → 404. Two groups with a room of the same name: each sees only its own children |
+| `CheckInTest` | The check-in rules | Happy path → 201, stored with the right tenant. Same room twice → 409. Already in another room → 409, naming that room. Checked out of room A, then into room B → 201. Two check-ins in a row for one child → only one succeeds. Missing or invalid `child_id` → 422. Deleted child or room → 404 |
+| `CheckOutTest` | The check-out rules | Happy path → 200 with `checked_out_at` set. Second check-out → 409. Unknown check-in → 404 |
+| `OccupantsTest` | The room list | Oldest check-in first. Checked-out and deleted children are left out. Pages: 25 by default, page 2, `per_page` capped at 100, `total_pages`. Empty room → empty list |
+| `CheckInLockTest` | The concurrency guard really locks | A second database connection holds a lock on the child, and a check-in must wait for it (it times out). Once the lock is released, the check-in succeeds. **This test fails if `lockForUpdate()` is removed**, which was checked |
+
+**How the tests are set up**
+
+- **Fresh data per test:** each test builds its own groups, rooms and children with factories, using helpers in `tests/TestCase.php` (`roomFor()`, `childFor()`, `checkInRow()`, `asTenant()`). `RefreshDatabase` rolls everything back after each test, so tests never depend on each other.
+- **Stable codes:** tests check the stable `code` (e.g. `ERR_409`), plus the translated message or `errors.model` where two errors share a code. Rewording a message in `lang/en/api.php` does not break them.
+- **Isolation tests re-read the database:** they don't stop at the 404 response. They re-read the other group's row to confirm nothing was changed.
+- **The lock test uses committed data:** it uses `DatabaseTruncation` instead of `RefreshDatabase`, because the second connection can't see uncommitted rows. It cleans up after itself so it doesn't affect the other tests.
+
 ## How it is built
 
 | Unit | Job |
@@ -105,21 +132,26 @@ Soft-deleted rooms and children resolve as 404. A child soft-deleted while check
 
 ## Assumptions
 
-- Authentication is already handled. There is no login, permission or role system.
-- A tenant is a nursery group. `X-Tenant-ID` carries the tenant id, not a nursery id.
-- A missing or malformed `X-Tenant-ID` returns 400. A well-formed id with no matching tenant returns 404.
-- Each child belongs to exactly one tenant. The same real child attending two groups is two records.
-- A child can use any room of any nursery of their own tenant. Nursery is not checked. To bring back nursery-level membership, add `children.nursery_id` and compare it with `rooms.nursery_id`.
-- Cross-tenant ids return 404, never 403, so the API does not reveal whether a record exists.
-- `checked_in_at` and `checked_out_at` are set by the server at request time, never sent by the client.
+- **Login is already handled elsewhere.** This system does not deal with usernames, passwords or staff roles.
+- **A customer is a nursery group** (for example "Little Stars Group"). A group can run several nurseries, and each nursery has rooms. Every request says which group it is for.
+- **A child belongs to only one nursery group.** If the same child attends two different groups, each group has its own separate record for that child.
+- **A child can go into any room in their own group**, in any of that group's nurseries. A child can never go into another group's room.
+- **Groups never see each other's data.** If a group asks for another group's room, child or check-in, the system answers "not found", so it does not even reveal that the record exists.
+- **A child can only be in one room at a time.** To move a child, staff check them out of the first room and then check them into the new one. The system will not move them automatically.
+- **The system records the check-in and check-out times itself**, at the moment staff press the button. Staff cannot type in a time.
+- **Deleted rooms and children are treated as not found.** If a child is deleted while still checked in, that check-in stays on record but the child no longer shows in the room list.
+- **Guardian phone numbers are 10-digit Indian mobile numbers.**
+- **The list of children in a room comes in pages**, 25 children per page by default and at most 100, oldest check-in first.
+- **Test data is created automatically** (two example groups with nurseries, rooms and children), since there are no screens for adding them.
+
+### Technical notes
+
+- `X-Tenant-ID` carries the group (tenant) id. Missing or malformed: 400. Unknown: 404.
+- Cross-tenant ids return 404, never 403.
 - Check-in takes the room from the URL and `child_id` from the body. Check-out takes the check-in id from the URL and has no body.
-- A child can have at most one open check-in. A second check-in is rejected with 409, not moved.
-- Soft-deleted rooms and children resolve as 404 (see above).
-- Guardian contact numbers are 10-digit Indian mobile numbers (`[6-9]` followed by 9 digits). They are generated in the factory only, since there is no register-child endpoint.
-- All ids are UUID v7. Timestamps are stored in UTC.
-- Occupants are paginated with 25 per page by default and at most 100, ordered by `checked_in_at` then `id`. The response carries `data.pagination` (`current_page`, `per_page`, `total_count`, `total_pages`) and `data.items`, with no page-link URLs.
-- Non-UUID path ids return 404 (route constraint), not a database error.
-- Data comes from seeders and factories. PostgreSQL is the datastore, and tests run against a separate PostgreSQL `testing` database.
+- All ids are UUID v7. Timestamps are stored in UTC. Non-UUID ids in the URL return 404.
+- Pagination: `?page` and `?per_page`, with the response under `data.pagination` and `data.items`.
+- PostgreSQL is the datastore, and tests use a separate PostgreSQL `testing` database.
 
 ## Left out on purpose
 
